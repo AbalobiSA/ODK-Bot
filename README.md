@@ -8,6 +8,7 @@
 
 **Usage**
 
+* Run <b>pip install -r requirements.txt</b> if Selenium is not installed
 * Edit the <b>accounts.xml</b> file as desired, specifying the usernames and passwords.
 * Supply the login details in <b>main.py</b> at top of file.
 * Run <b>main.py</b>.
