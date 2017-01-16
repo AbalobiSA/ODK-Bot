@@ -2,3 +2,4 @@
 *.exe
 *.log
 secrets.py
+secrets.pyc
