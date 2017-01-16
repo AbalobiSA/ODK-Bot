@@ -2,6 +2,7 @@
 
 **Requirements**
 
+* Firefox 48 or higher
 * <a href="https://github.com/mozilla/geckodriver/releases"><i>Geckoriver</i></a>
 * Selenium
 * Python 2.7 - Untested on Python 3.x
