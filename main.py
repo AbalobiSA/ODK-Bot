@@ -136,7 +136,7 @@ def main():
     driver = None
     
     if ASK_CREDENTIALS:
-        print 'No secrets.py file found: Asking credentials'
+        print 'No secrets.py file found, asking credentials:'
         _username, _password = ask_credentials()
     else:
         _username = secrets.USERNAME
