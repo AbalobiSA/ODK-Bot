@@ -1,8 +1,4 @@
 <accounts>
-    <account username="test" password="Nipple"/>
-    <account username="poop1" password="apple"/>
-    <account username="poop2" password="apple"/>
-    <account username="poop3" password="apple"/>
-    <account username="poop4" password="apple"/>
-    <account username="poop5" password="apple"/>
+    <account username="username1" password="password1"/>
+    <account username="username2" password="password2"/>
 </accounts>

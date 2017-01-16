@@ -9,9 +9,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
-# The username and password to log into the site
-_username = "username"
-_password = "password"
+try:
+    import secrets
+    ASK_CREDENTIALS = False
+except:
+    ASK_CREDENTIALS = True
+
+# Should exception messages be printed
+PRINT_EXCEPTIONS = False
 
 # The time to wait before the webdriver decides that the element does not exist
 _wait_time = 60.0
@@ -130,6 +135,13 @@ def main():
 
     driver = None
     
+    if ASK_CREDENTIALS:
+        print 'No secrets.py file found: Asking credentials'
+        _username, _password = ask_credentials()
+    else:
+        _username = secrets.USERNAME
+        _password = secrets.PASSWORD
+    
     try:
         # Get webdriver
         driver = get_driver()
@@ -158,14 +170,35 @@ def main():
                 print 'Account "%s" not found in accounts supplied in "accounts.xml". Skipping updating of password...' % username
                 
     except Exception as e:
-        print e
+        if PRINT_EXCEPTIONS:
+            print e
+        else:
+            print 'Something went wrong during execution'
     
     # Finally stop the driver and close all browser windows
     if driver is not None:
-        close_driver(driver)
+        try:
+            close_driver(driver)
+        except Exception as e:
+            if PRINT_EXCEPTIONS:
+                print e
+            else:
+                print 'Something went wrong while closing'
     
     print '=========='
     print 'Bye Bye :)'
+    
+    
+def ask_credentials():
+    """
+    Ask the user for their username and password
+    :return: The username and password
+    """
+    
+    username = raw_input('Please enter your login username: ')
+    password = raw_input('Please enter your login password: ')
+    
+    return username, password
         
         
 def parse_xml():
