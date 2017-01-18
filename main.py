@@ -141,6 +141,8 @@ def main():
     else:
         _username = secrets.USERNAME
         _password = secrets.PASSWORD
+
+    accounts = parse_xml()
     
     try:
         # Get webdriver
@@ -149,8 +151,6 @@ def main():
         # Open Abalobi ODK page
         url = "https://%s:%s@abalobi-demo.appspot.com/Aggregate.html#admin" % (_username, _password)
         driver.get(url)
-
-        accounts = parse_xml()
 
         sleeper.sleep(5.0)
         num_rows = get_number_of_rows(driver)
@@ -211,21 +211,73 @@ def parse_xml():
         print 'The accounts.xml file does not exists. Exiting'
         exit()
 
-    print "Parsing the accounts.xml..."
+    try:
+        print "Parsing the accounts.xml..."
     
-    # Dictionary containing the username to password mappings
-    parsed_accounts = {}
+        # Dictionary containing the username to password mappings
+        parsed_accounts = {}
     
-    e = xml.etree.ElementTree.parse(sys.path[0] + '/accounts.xml').getroot()
+        e = xml.etree.ElementTree.parse(sys.path[0] + '/accounts.xml').getroot()
     
-    accounts = e.findall('account')
-    for account in accounts:
-        username = str(account.get('username'))
-        password = str(account.get('password'))
+        accounts = e.findall('account')
+        for account in accounts:
+            username = str(account.get('username'))
+            password = str(account.get('password'))
+        
+            parsed_accounts[username] = password
+    
+        return parsed_accounts
+    except Exception as e:
+        print 'Something went wrong with parsing XML file. Exiting'
+        raise e
 
-        parsed_accounts[username] = password
+
+def parse_csv():
+    """
+    Parse the CSV file
+    :return: A list of structure [[username1, password1, community1], [username2, password2, community2]]
+    """
     
-    return parsed_accounts
+    import os
+    import sys
+    import csv
+    
+    if not os.path.exists(sys.path[0] + '/test.csv'):
+        print 'The test.csv file does not exists. Exiting'
+        exit()
+    
+    try:
+        print "Parsing the text.csv file..."
+        
+        # List containing the username, password and community
+        parsed_accounts = []
+        
+        heading = True
+        
+        username_index = -1
+        password_index = -1
+        
+        with open('test.csv', 'r') as f:
+            reader = csv.reader(f)
+            
+            for row in reader:
+                print row
+                
+                if heading:
+                    heading = False
+                    
+                    username_index = row.index("Username")
+                    password_index = row.index("Password")
+                else:
+                    parsed_accounts.append([row[username_index], row[password_index]])
+                    # mappings.append([row[username_index]])
+                    
+                    # print mappings
+        
+        return parsed_accounts
+    except Exception as e:
+        print 'Something went wrong with parsing CSV file. Exiting'
+        raise e
 
 
 if __name__ == '__main__':
