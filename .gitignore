@@ -3,3 +3,4 @@
 *.log
 secrets.py
 secrets.pyc
+*.csv

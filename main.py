@@ -142,6 +142,7 @@ def main():
         _username = secrets.USERNAME
         _password = secrets.PASSWORD
 
+    # accounts = parse_csv()
     accounts = parse_xml()
     
     try:
@@ -250,7 +251,7 @@ def parse_csv():
         print "Parsing the text.csv file..."
         
         # List containing the username, password and community
-        parsed_accounts = []
+        parsed_accounts = {}
         
         heading = True
         
@@ -261,7 +262,7 @@ def parse_csv():
             reader = csv.reader(f)
             
             for row in reader:
-                print row
+                # print row
                 
                 if heading:
                     heading = False
@@ -269,10 +270,9 @@ def parse_csv():
                     username_index = row.index("Username")
                     password_index = row.index("Password")
                 else:
-                    parsed_accounts.append([row[username_index], row[password_index]])
-                    # mappings.append([row[username_index]])
-                    
-                    # print mappings
+                    parsed_accounts[row[username_index]] = row[password_index]
+        
+        # print parsed_accounts
         
         return parsed_accounts
     except Exception as e:
@@ -282,3 +282,4 @@ def parse_csv():
 
 if __name__ == '__main__':
     main()
+    # parse_csv()
