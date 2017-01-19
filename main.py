@@ -236,7 +236,7 @@ def parse_xml():
 def parse_csv():
     """
     Parse the CSV file
-    :return: A list of structure [[username1, password1, community1], [username2, password2, community2]]
+    :return: A mapping(dictionary) of username to password
     """
     
     import os
