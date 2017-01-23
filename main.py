@@ -142,15 +142,16 @@ def main():
         _username = secrets.USERNAME
         _password = secrets.PASSWORD
 
-    # accounts = parse_csv()
-    accounts = parse_xml()
+    accounts = parse_csv()
+    # accounts = parse_xml()
     
     try:
         # Get webdriver
         driver = get_driver()
         
         # Open Abalobi ODK page
-        url = "https://%s:%s@abalobi-demo.appspot.com/Aggregate.html#admin" % (_username, _password)
+        # https://%s:%s@abalobi-fisher.appspot.com/Aggregate.html#admin/permission///
+        url = "https://%s:%s@abalobi-fisher.appspot.com/Aggregate.html#admin/permission///" % (_username, _password)
         driver.get(url)
 
         sleeper.sleep(5.0)
@@ -248,7 +249,7 @@ def parse_csv():
         exit()
     
     try:
-        print "Parsing the text.csv file..."
+        print "Parsing the test.csv file..."
         
         # List containing the username, password and community
         parsed_accounts = {}
