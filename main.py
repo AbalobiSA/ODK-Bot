@@ -21,6 +21,78 @@ PRINT_EXCEPTIONS = False
 # The time to wait before the webdriver decides that the element does not exist
 _wait_time = 60.0
 
+GLOBAL_USER_ARRAY = []
+
+# print "Reading in accounts..."
+# for i in range(0,num_accounts):
+#     globalUserArray.append([username, lineNumber])
+# print "Read in " + num_accounts + " accounts."
+def main():
+    """
+    Main method
+    :return: None
+    """
+
+    driver = None
+    
+    if ASK_CREDENTIALS:
+        print 'No secrets.py file found, asking credentials:'
+        _username, _password = ask_credentials()
+    else:
+        _username = secrets.USERNAME
+        _password = secrets.PASSWORD
+
+    accounts = parse_csv()
+    # accounts = parse_xml()
+    
+    try:
+        # Get webdriver
+        driver = get_driver()
+        
+        # Open Abalobi ODK page
+        # https://%s:%s@abalobi-fisher.appspot.com/Aggregate.html#admin/permission///
+        url = "https://%s:%s@abalobi-fisher.appspot.com/Aggregate.html#admin/permission///" % (_username, _password)
+        driver.get(url)
+
+
+        sleeper.sleep(5.0)
+        num_rows = get_number_of_rows(driver)
+        
+   #      for i in range(0,num_rows):
+			# globalUserArray.append([username, lineNumber])
+
+        for row in xrange(1, num_rows + 1):
+            # sleeper.sleep(2.5)
+        
+            username = get_row_username(driver, row)
+            
+            if username in accounts:
+                print 'Account "%s" found in accounts supplied in "accounts.xml". Updating password...' % username
+                
+                press_row_button(driver, row)
+                sleeper.sleep(2.5)
+                enter_popup_password(driver, accounts[username])
+            # else:
+                # print 'Account "%s" not found in accounts supplied in "accounts.xml". Skipping updating of password...' % username
+                
+    except Exception as e:
+        if PRINT_EXCEPTIONS:
+            print e
+        else:
+            print 'Something went wrong during execution'
+    
+    # Finally stop the driver and close all browser windows
+    if driver is not None:
+        try:
+            close_driver(driver)
+        except Exception as e:
+            if PRINT_EXCEPTIONS:
+                print e
+            else:
+                print 'Something went wrong while closing'
+    
+    print '=========='
+    print 'Bye Bye :)'
 
 def get_driver():
     """
@@ -55,12 +127,12 @@ def get_row_username(driver, row):
     :return: The username
     """
     
-    print 'Getting row %d username...' % row
+    # print 'Getting row %d username...' % row
 
     xpath = '//*[@id="mainNav"]/tbody/tr[2]/td/div/div[4]/table/tbody/tr[2]/td/div/div[1]/div/div/table/tbody[1]/tr[%d]/td[2]/div/input' % row
     username = WebDriverWait(driver, _wait_time).until(ec.presence_of_element_located((By.XPATH, xpath))).get_property('value')
     
-    print 'The username found is: %s' % username
+    # print 'The username found is: %s' % username
     
     return username
     
@@ -127,68 +199,7 @@ def get_number_of_rows(driver):
     return num_rows
 
 
-def main():
-    """
-    Main method
-    :return: None
-    """
 
-    driver = None
-    
-    if ASK_CREDENTIALS:
-        print 'No secrets.py file found, asking credentials:'
-        _username, _password = ask_credentials()
-    else:
-        _username = secrets.USERNAME
-        _password = secrets.PASSWORD
-
-    accounts = parse_csv()
-    # accounts = parse_xml()
-    
-    try:
-        # Get webdriver
-        driver = get_driver()
-        
-        # Open Abalobi ODK page
-        # https://%s:%s@abalobi-fisher.appspot.com/Aggregate.html#admin/permission///
-        url = "https://%s:%s@abalobi-fisher.appspot.com/Aggregate.html#admin/permission///" % (_username, _password)
-        driver.get(url)
-
-        sleeper.sleep(5.0)
-        num_rows = get_number_of_rows(driver)
-        
-        for row in xrange(1, num_rows + 1):
-            sleeper.sleep(2.5)
-        
-            username = get_row_username(driver, row)
-            
-            if username in accounts:
-                print 'Account "%s" found in accounts supplied in "accounts.xml". Updating password...' % username
-                
-                press_row_button(driver, row)
-                sleeper.sleep(2.5)
-                enter_popup_password(driver, accounts[username])
-            else:
-                print 'Account "%s" not found in accounts supplied in "accounts.xml". Skipping updating of password...' % username
-                
-    except Exception as e:
-        if PRINT_EXCEPTIONS:
-            print e
-        else:
-            print 'Something went wrong during execution'
-    
-    # Finally stop the driver and close all browser windows
-    if driver is not None:
-        try:
-            close_driver(driver)
-        except Exception as e:
-            if PRINT_EXCEPTIONS:
-                print e
-            else:
-                print 'Something went wrong while closing'
-    
-    print '=========='
-    print 'Bye Bye :)'
     
     
 def ask_credentials():
