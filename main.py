@@ -1,6 +1,8 @@
 import sys
 import os
+
 import time as sleeper
+import argparse
 
 import xml.etree.ElementTree
 
@@ -16,17 +18,14 @@ except:
     ASK_CREDENTIALS = True
 
 # Should exception messages be printed
-PRINT_EXCEPTIONS = False
+PRINT_EXCEPTIONS = True
 
 # The time to wait before the webdriver decides that the element does not exist
 _wait_time = 60.0
 
 GLOBAL_USER_ARRAY = []
 
-# print "Reading in accounts..."
-# for i in range(0,num_accounts):
-#     globalUserArray.append([username, lineNumber])
-# print "Read in " + num_accounts + " accounts."
+
 def main():
     """
     Main method
@@ -42,38 +41,36 @@ def main():
         _username = secrets.USERNAME
         _password = secrets.PASSWORD
 
-    accounts = parse_csv()
-    # accounts = parse_xml()
-    
+    if globals()['_filetype'] == 'xml':
+        accounts = parse_xml()
+    elif globals()['_filetype'] == 'csv':
+        accounts = parse_csv()
+    else:
+        print 'Filetype not supported'
+        sys.exit(1)
+
     try:
         # Get webdriver
         driver = get_driver()
         
         # Open Abalobi ODK page
-        # https://%s:%s@abalobi-fisher.appspot.com/Aggregate.html#admin/permission///
         url = "https://%s:%s@abalobi-fisher.appspot.com/Aggregate.html#admin/permission///" % (_username, _password)
         driver.get(url)
 
-
         sleeper.sleep(5.0)
         num_rows = get_number_of_rows(driver)
-        
-   #      for i in range(0,num_rows):
-			# globalUserArray.append([username, lineNumber])
 
         for row in xrange(1, num_rows + 1):
-            # sleeper.sleep(2.5)
-        
             username = get_row_username(driver, row)
             
             if username in accounts:
-                print 'Account "%s" found in accounts supplied in "accounts.xml". Updating password...' % username
+                print 'Account "%s" found in accounts supplied in "accounts.csv". Updating password...' % username
                 
                 press_row_button(driver, row)
                 sleeper.sleep(2.5)
                 enter_popup_password(driver, accounts[username])
-            # else:
-                # print 'Account "%s" not found in accounts supplied in "accounts.xml". Skipping updating of password...' % username
+            else:
+                print 'Account "%s" not found in accounts supplied in "accounts.csv". Skipping updating of password...' % username
                 
     except Exception as e:
         if PRINT_EXCEPTIONS:
@@ -94,6 +91,7 @@ def main():
     print '=========='
     print 'Bye Bye :)'
 
+
 def get_driver():
     """
     Get a FireFox webdriver instance
@@ -102,7 +100,33 @@ def get_driver():
 
     print "Initializing the webdriver"
 
-    driver = webdriver.Firefox()
+    if globals()['_browser'] == 'phantom':
+        if sys.platform == "linux" or sys.platform == "linux2":
+            # linux
+            print 'You are running Linux'
+            driver = webdriver.PhantomJS(executable_path="./phantomjs")
+        elif sys.platform == "win32":
+            # Windows...
+            print 'You are running Windows'
+            driver = webdriver.PhantomJS(executable_path="./phantomjs.exe")
+        else:
+            print 'Operating system not supported. Exiting...'
+            sys.exit(1)
+    elif globals()['_browser'] == 'firefox':
+        if sys.platform == "linux" or sys.platform == "linux2":
+            # linux
+            print 'You are running Linux'
+            driver = webdriver.Firefox(executable_path="./geckodriver")
+        elif sys.platform == "win32":
+            # Windows...
+            print 'You are running Windows'
+            driver = webdriver.Firefox(executable_path="./geckodriver.exe")
+        else:
+            print 'Operating system not supported. Exiting...'
+            sys.exit(1)
+    else:
+        print 'Browser not supported. Exiting...'
+        sys.exit(1)
 
     return driver
 
@@ -199,9 +223,6 @@ def get_number_of_rows(driver):
     return num_rows
 
 
-
-    
-    
 def ask_credentials():
     """
     Ask the user for their username and password
@@ -292,6 +313,26 @@ def parse_csv():
         raise e
 
 
+def parse_argv():
+    """
+
+    :return:
+    """
+
+    parser = argparse.ArgumentParser(description='Updates user password on ODK', add_help=True, version='1.1')
+
+    parser.add_argument('--browser', '-b', type=str, choices=['firefox', 'phantom'], default='phantom', help='The browser to use')
+    parser.add_argument('--input', '-i', type=str, choices=['csv', 'xml'], default='csv', help='The input file-type to use')
+
+    args = parser.parse_args()
+
+    print 'The arguments are =>', args
+    print '-' * 25
+
+    globals()['_browser'] = args.browser
+    globals()['_filetype'] = args.input
+
+
 if __name__ == '__main__':
+    parse_argv()
     main()
-    # parse_csv()
